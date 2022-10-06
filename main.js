@@ -1,5 +1,8 @@
 const path = require('path');
-const { app, BrowserWindow, Menu } = require('electron');
+const os = require('os');
+const fs = require('fs');
+const resizeImg = require('resize-img');
+const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
 
 const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
@@ -43,9 +46,11 @@ const menu = [
     ] : [])
 ];
 
+let mainWindow;
+
 // Create main window
 function createMainWindow() {
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         title: 'Image Resizer',
         width: isDev ? 1000 : 500,
         height: 600,
@@ -85,6 +90,9 @@ app.whenReady().then((resolve) => {
     const mainMenu = Menu.buildFromTemplate(menu);
     Menu.setApplicationMenu(mainMenu);
 
+    // Remove mainWindow from memory on closed
+    mainWindow.on('closed', () => { mainWindow = null });
+
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
             createMainWindow()
@@ -94,8 +102,43 @@ app.whenReady().then((resolve) => {
     alert('Oops..something went wrong.');
 });
 
+// Respond to ipcRenderer event resize
+ipcMain.on('image:resize', (event, options) => {
+    options.destination = path.join(os.homedir(), 'image-resizer');
+    resizeImage(options);
+});
+
+// Resize the image passed from ipcRenderer
+async function resizeImage({ imgPath, width, height, destination }) {
+    try {
+        const newPath = await resizeImg(fs.readFileSync(imgPath), {
+            width: +width,
+            height: +height
+        });
+
+        // Specify filename
+        const filename = path.basename(imgPath);
+
+        // Create destination folder
+        if (!fs.existsSync(destination)) {
+            fs.mkdirSync(destination);
+        }
+
+        // Write file to destination
+        fs.writeFileSync(path.join(destination, filename), newPath);
+
+        // Send success message to renderer
+        mainWindow.webContents.send('image:done');
+
+        // Open destination folder
+        shell.openPath(destination);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 app.on('window-all-closed', () => {
     if (!isMac) {
-        app.quit()
+        app.quit();
     }
-})
+});
