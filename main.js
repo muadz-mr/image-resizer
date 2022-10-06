@@ -1,14 +1,20 @@
 const path = require('path');
 const { app, BrowserWindow } = require('electron');
 
+const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
 
 function createMainWindow() {
     const mainWindow = new BrowserWindow({
         title: 'Image Resizer',
-        width: 500,
+        width: isDev ? 1000 : 500,
         height: 600
     });
+
+    // Open dev tools if in dev environment
+    if (isDev) {
+        mainWindow.webContents.openDevTools();
+    }
 
     // mainWindow.loadURL('https://www.twitter.com'); //Can also load url in the browser window
     mainWindow.loadFile(path.join(__dirname, './renderer/index.html'));
