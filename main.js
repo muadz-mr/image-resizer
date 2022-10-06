@@ -1,6 +1,8 @@
 const path = require('path');
 const { app, BrowserWindow } = require('electron');
 
+const isMac = process.platform === 'darwin';
+
 function createMainWindow() {
     const mainWindow = new BrowserWindow({
         title: 'Image Resizer',
@@ -14,6 +16,18 @@ function createMainWindow() {
 
 app.whenReady().then((resolve) => {
     createMainWindow();
+
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createMainWindow()
+        }
+    })
 }, (reject) => {
     alert('Oops..something went wrong.');
 });
+
+app.on('window-all-closed', () => {
+    if (!isMac) {
+        app.quit()
+    }
+})
