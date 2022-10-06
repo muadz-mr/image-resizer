@@ -9,7 +9,7 @@ function loadImage(event) {
     const file = event.target.files[0];
 
     if (!isFileAnImage(file)) {
-        console.log('Please select an image');
+        showToast('error', 'Please select an image');
         return;
     }
 
@@ -31,6 +31,20 @@ function isFileAnImage(file) {
     const acceptedImageTypes = ['image/gif', 'image/png', 'image/jpeg', 'image/jpg'];
 
     return file && acceptedImageTypes.includes(file['type']);
+}
+
+function showToast(type, message) {
+    Toastify.toast({
+        text: message,
+        duration: 3000,
+        close: false,
+        style: {
+            background: type === 'success' ? 'green' : 'red',
+            color: 'white',
+            textAlign: 'center',
+            padding: '1rem 2rem'
+        }
+    });
 }
 
 img.addEventListener('change', loadImage);
