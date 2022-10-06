@@ -13,7 +13,16 @@ function loadImage(event) {
         return;
     }
 
-    console.log('success');
+    // Get original dimensions
+    const originalImg = new Image();
+    originalImg.src = URL.createObjectURL(file);
+    originalImg.onload = function () {
+        widthInput.value = this.width;
+        heightInput.value = this.height;
+    }
+
+    form.style.display = 'block';
+    filename.innerText = file.name;
 }
 
 // Check if file is an image
