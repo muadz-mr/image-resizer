@@ -12,6 +12,7 @@ const menu = [
             submenu: [
                 {
                     label: 'About',
+                    click: createAboutWindow
                 }
             ]
         }
@@ -35,6 +36,7 @@ const menu = [
             submenu: [
                 {
                     label: 'About',
+                    click: createAboutWindow
                 }
             ]
         }
@@ -56,6 +58,20 @@ function createMainWindow() {
 
     // mainWindow.loadURL('https://www.twitter.com'); //Can also load url in the browser window
     mainWindow.loadFile(path.join(__dirname, './renderer/index.html'));
+}
+
+
+// Create About window
+function createAboutWindow() {
+    const aboutWindow = new BrowserWindow({
+        title: 'About Image Resizer',
+        width: 300,
+        height: 300,
+        autoHideMenuBar: true
+    });
+
+    // aboutWindow.loadURL('https://www.twitter.com'); //Can also load url in the browser window
+    aboutWindow.loadFile(path.join(__dirname, './renderer/about.html'));
 }
 
 app.whenReady().then((resolve) => {
